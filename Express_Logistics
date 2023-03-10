@@ -1,0 +1,41 @@
+<apex:page standardController="Account" extensions="ExpressController" >
+    <apex:form >
+        <apex:pageBlock title="Account Details" mode="edit">
+            
+            <apex:pageBlockSection columns="2">
+                <apex:inputField value="{!Account.Name}"/>
+                <apex:inputField value="{!Account.AccountNumber}"/>
+                <apex:inputField value="{!Account.Type}"/>
+                <apex:inputField value="{!Account.Active__c}"/>
+                <apex:inputField value="{!Account.Phone}"/>
+                <apex:inputField value="{!Account.Fax}"/>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!save}"/>
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+           
+            <apex:pageBlock title="Search related contacts">
+                <apex:inputText value="{!searchString}" label="Input"/>
+        		<apex:commandButton value="Search" action="{!searchContacts}"/>
+        
+        <apex:pageBlock title="Related Contacts">
+            <apex:pageBlockTable value="{!searchResult}" var="a">
+                <apex:column headerValue="Name">
+            		<apex:outputLink value="/{!a.Id}">{!a.Name}</apex:outputLink>
+         		</apex:column>
+                <apex:column headerValue="Title">
+            		<apex:outputField value="{!a.Title}" />
+          		</apex:column>
+                <apex:column headerValue="Phone">
+            		<apex:outputField value="{!a.Phone}" />
+          		</apex:column>
+                 <apex:column headerValue="Is Primary Contact">
+                 </apex:column>
+            </apex:pageBlockTable>
+        	</apex:pageBlock>
+            </apex:pageBlock>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
