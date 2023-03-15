@@ -1,8 +1,11 @@
-<apex:page standardController="Account" extensions="ExpressController" >
-    <apex:form >
-        <apex:pageBlock title="Account Details" mode="edit">
-            
-            <apex:pageBlockSection columns="2">
+<apex:page standardController="Account" extensions="AccountContactController">
+     <apex:form>
+     <apex:pageBlock title="Account Details">
+            <apex:pageBlockButtons>
+                <apex:commandButton action="{!save}" value="Save"/>
+                <apex:commandButton action="{!cancel}" value="Cancel"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection>
                 <apex:inputField value="{!Account.Name}"/>
                 <apex:inputField value="{!Account.AccountNumber}"/>
                 <apex:inputField value="{!Account.Type}"/>
@@ -10,32 +13,28 @@
                 <apex:inputField value="{!Account.Phone}"/>
                 <apex:inputField value="{!Account.Fax}"/>
             </apex:pageBlockSection>
-            
-            <apex:pageBlockButtons >
-                <apex:commandButton value="Save" action="{!save}"/>
-                <apex:commandButton value="Cancel" action="{!cancel}"/>
-            </apex:pageBlockButtons>
-           
-            <apex:pageBlock title="Search related contacts">
-                <apex:inputText value="{!searchString}" label="Input"/>
-        		<apex:commandButton value="Search" action="{!searchContacts}"/>
-        
-        <apex:pageBlock title="Related Contacts">
-            <apex:pageBlockTable value="{!searchResult}" var="a">
-                <apex:column headerValue="Name">
-            		<apex:outputLink value="/{!a.Id}">{!a.Name}</apex:outputLink>
-         		</apex:column>
-                <apex:column headerValue="Title">
-            		<apex:outputField value="{!a.Title}" />
-          		</apex:column>
-                <apex:column headerValue="Phone">
-            		<apex:outputField value="{!a.Phone}" />
-          		</apex:column>
-                 <apex:column headerValue="Is Primary Contact">
-                 </apex:column>
-            </apex:pageBlockTable>
-        	</apex:pageBlock>
-            </apex:pageBlock>
+        </apex:pageBlock>
+        <apex:pageBlock title="Contacts">
+            <apex:pageBlockSection columns="1">
+                <apex:inputText value="{!contactName}" label="Search by Contact Name">
+                    <apex:actionSupport event="onkeyup" action="{!searchContacts}" />
+                </apex:inputText>
+                <apex:pageBlockTable value="{!filteredContacts}" var="c">
+                    <apex:column headerValue="Name" value="{!c.Name}"/>
+                    <apex:column headerValue="Title" value="{!c.Title}"/>
+                    <apex:column headerValue="Phone" value="{!c.Phone}"/>
+                    <apex:column headerValue="Primary Contact">
+                        <apex:outputPanel rendered="{!c.Is_Primary_Contact__c}">
+                            
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!NOT(c.Is_Primary_Contact__c)}">
+                            <apex:commandLink value="Set Primary Contact" onclick="if(!confirm('Are you sure you want to set this as the primary contact?')){return false;} else {setPrimary('{!c.Id}');}" rerender="contactList"/>
+                        </apex:outputPanel>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
         </apex:pageBlock>
     </apex:form>
+  
 </apex:page>
+
