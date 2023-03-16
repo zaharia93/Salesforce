@@ -1,34 +1,63 @@
-public with sharing class AccountContactController {
+public class AccountContactController {
+    
+    public Account account { get; set; }
+    public List<Contact> contacts { get; set; }
     public String contactName { get; set; }
-    public List<Contact> filteredContacts { get; set; }
-    private final Account currentAccount;
-
-    public AccountContactController(ApexPages.StandardController controller) {
-        this.currentAccount = (Account)controller.getRecord();
-        this.filteredContacts = new List<Contact>();
+    private ApexPages.StandardController stdController;
+    
+    public AccountContactController(ApexPages.StandardController stdController) {
+        this.stdController = stdController;
+        account = (Account)stdController.getRecord();
+        contacts = new List<Contact>();
     }
-
+    
     public void searchContacts() {
-        if (contactName == null || contactName.trim().length() == 0) {
-            filteredContacts = [SELECT Id, Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE AccountId = :currentAccount.Id ORDER BY Name];
+        contacts = [SELECT Id, Name, Title, Phone, Is_Primary_Contact__c 
+                    FROM Contact 
+                    WHERE AccountId = :account.Id 
+                    AND Name LIKE :contactName + '%'];
+    }
+    
+    public PageReference confirmSetPrimaryContact() {
+        String selectedContactId = ApexPages.currentPage().getParameters().get('selectedContactId');
+        if (String.isNotBlank(selectedContactId)) {
+            for (Contact c : contacts) {
+                if (c.Id == selectedContactId) {
+                    c.Is_Primary_Contact__c = true;
+                } else {
+                    c.Is_Primary_Contact__c = false;
+                }
+            }
+            update contacts;
+        }
+        return null;
+    }
+    
+    public void setPrimaryContact() {
+        Contact primaryContact = [SELECT Id 
+                                  FROM Contact 
+                                  WHERE AccountId = :account.Id 
+                                  AND Is_Primary_Contact__c = true 
+                                  LIMIT 1];
+        if (primaryContact != null) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.WARNING, 'A primary contact already exists. Please remove the primary flag from the existing primary contact.'));
         } else {
-            String searchTerm = '%' + contactName.trim().replace(' ', '%') + '%';
-            filteredContacts = [SELECT Id, Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE AccountId = :currentAccount.Id AND Name LIKE :searchTerm ORDER BY Name];
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Click "Set as Primary" next to a contact to set it as the primary contact.'));
         }
     }
-
-    public void setPrimaryContact() {
-        String contactId = ApexPages.currentPage().getParameters().get('contactId');
-        Contact primaryContact = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE Id = :contactId AND AccountId = :currentAccount.Id];
-        if (primaryContact != null) {
-            primaryContact.Is_Primary_Contact__c = true;
-            update primaryContact;
-            List<Contact> secondaryContacts = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE AccountId = :currentAccount.Id AND Id != :primaryContact.Id];
-            for (Contact c : secondaryContacts) {
-                c.Is_Primary_Contact__c = false;
-            }
-            update secondaryContacts;
+    
+    public PageReference save() {
+        try {
+            update account;
+            return stdController.view();
+        } catch (Exception e) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, e.getMessage()));
+            return null;
         }
-        searchContacts();
+    }
+    
+    public PageReference cancel() {
+        stdController.cancel();
+        return null;
     }
 }
