@@ -47,11 +47,11 @@ public class AccountContactController {
     }
     
     public PageReference save() {
-        try {
+        try {if (account != null)
             update account;
             return stdController.view();
         } catch (Exception e) {
-            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, e.getMessage()));
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.WARNING, e.getMessage()));
             return null;
         }
     }
