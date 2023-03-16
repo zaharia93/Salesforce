@@ -1,0 +1,24 @@
+public class UpdatePrimaryContactPhone implements Queueable {
+    Contact primaryContact;
+    
+    public UpdatePrimaryContactPhone(Contact primaryContact) {
+        this.primaryContact = primaryContact;
+    }
+    
+    public void execute(QueueableContext context) {
+        try {
+            
+            List<Contact> contactsToUpdate = [SELECT Id, AccountId
+                                              FROM Contact
+                                              WHERE AccountId = :primaryContact.AccountId];
+           
+            for (Contact contactToUpdate : contactsToUpdate) {
+                contactToUpdate.Primary_Contact_Phone__c = primaryContact.Phone;
+            }
+            update contactsToUpdate;
+        } catch (Exception e) {
+            
+            System.debug('Error updating Primary Contact Phone: ' + e.getMessage());
+        }
+    }
+}
