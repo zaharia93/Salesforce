@@ -1,0 +1,17 @@
+trigger ContactTriggers on Contact (before insert) {
+Set<Id> primaryContactIds = new Set<Id>();
+    for (Contact contact : Trigger.new) {
+        if (contact.Is_Primary_Contact__c && contact.Phone != null) {
+            primaryContactIds.add(contact.Id);
+        }
+    }
+    if (!primaryContactIds.isEmpty()) {
+        
+        for (Id primaryContactId : primaryContactIds) {
+            UpdatePrimaryContactPhone job = new UpdatePrimaryContactPhone([SELECT Id, Phone, AccountId 
+                                                                            FROM Contact 
+                                                                            WHERE Id = :primaryContactId]);
+            System.enqueueJob(job);
+        }
+    }
+}
