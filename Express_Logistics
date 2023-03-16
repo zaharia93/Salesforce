@@ -14,15 +14,14 @@
                 <apex:inputField value="{!Account.Fax}"/>
             </apex:pageBlockSection>
         </apex:pageBlock>
-        <apex:pageBlock title="Related Contacts">
-            <apex:pageBlockButtons >
-                <apex:commandButton value="Set Primary Contact" action="{!setPrimaryContact}"/>
-            </apex:pageBlockButtons>
+       
+            <apex:pageBlock title="Search related contacts">
             <apex:pageBlockSection >
-                <apex:outputLabel value="Search by Contact Name:" for="contactName"/>
                 <apex:inputText id="contactName" value="{!contactName}"/>
                 <apex:commandButton value="Search" action="{!searchContacts}"/>
             </apex:pageBlockSection>
+                </apex:pageBlock>
+             <apex:pageBlock title="Related Contacts">
             <apex:pageBlockTable value="{!contacts}" var="contact">
                 <apex:column headerValue="Name" value="{!contact.Name}"/>
                 <apex:column headerValue="Title" value="{!contact.Title}"/>
