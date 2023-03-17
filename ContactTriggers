@@ -1,4 +1,5 @@
 trigger ContactTriggers on Contact (before insert) {
+
 Set<Id> primaryContactIds = new Set<Id>();
     for (Contact contact : Trigger.new) {
         if (contact.Is_Primary_Contact__c && contact.Phone != null) {
