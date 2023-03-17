@@ -1,0 +1,10 @@
+<apex:page standardController="Account" extensions="OpenWeatherMapController">
+    <apex:form>
+        <apex:outputPanel id="weatherPanel">
+            <h3>Current Weather</h3>
+            <p><b>Temperature:</b> {!temperature} &#8451;</p>
+            <p><b>Description:</b> {!description}</p>
+            <img src="{!iconUrl}" alt="{!description}" />
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>
