@@ -1,0 +1,54 @@
+public class OpenWeatherMapController {
+    private final Account account;
+    public String temperature { get; private set; }
+    public String description { get; private set; }
+    public String iconUrl { get; private set; }
+
+   
+	public OpenWeatherMapController(ApexPages.StandardController stdController) {
+    account = (Account)stdController.getRecord();
+    if(account != null && account.BillingCity != null) {
+        String billingCity = account.BillingCity;
+        List<Account> accounts = [SELECT BillingCity FROM Account WHERE BillingCity = :billingCity LIMIT 1];
+        if(!accounts.isEmpty()) {
+            callOpenWeatherMapAPI();
+        }
+    }
+}
+
+    
+    private void callOpenWeatherMapAPI() {
+        String apiKey = '';
+        String city = EncodingUtil.urlEncode(account.BillingCity, 'UTF-8');
+        String url = 'http://api.openweathermap.org/data/2.5/weather?q=' + city + '&units=metric&appid=' + apiKey;
+
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(url);
+        request.setMethod('GET');
+
+        HttpResponse response = http.send(request);
+        if(response.getStatusCode() == 200) {
+            OpenWeatherMapResponse weather = (OpenWeatherMapResponse)JSON.deserialize(response.getBody(), OpenWeatherMapResponse.class);
+            if(weather != null && weather.main != null && weather.weather != null && weather.weather.size() > 0) {
+                temperature = String.valueOf(weather.main.temp);
+                description = weather.weather[0].description;
+                iconUrl = 'http://openweathermap.org/img/w/' + weather.weather[0].icon + '.png';
+            }
+        }
+    }
+
+    public class OpenWeatherMapResponse {
+        public OpenWeatherMapMain main { get; set; }
+        public List<OpenWeatherMapWeather> weather { get; set; }
+    }
+
+    public class OpenWeatherMapMain {
+        public Decimal temp { get; set; }
+    }
+
+    public class OpenWeatherMapWeather {
+        public String description { get; set; }
+        public String icon { get; set; }
+    }
+}
