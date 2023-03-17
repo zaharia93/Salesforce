@@ -7,7 +7,6 @@ public class UpdatePrimaryContactPhone implements Queueable {
     
     public void execute(QueueableContext context) {
         try {
-            
             List<Contact> contactsToUpdate = [SELECT Id, AccountId
                                               FROM Contact
                                               WHERE AccountId = :primaryContact.AccountId];
